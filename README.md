@@ -23,13 +23,19 @@ See folder structure in repository root.
    - (Optional) `aws_region`, `instance_type`
 
 3. Initialize:
+   ```
     terraform init
+   ```
 
 4. Plan:
+   ```
     terraform plan -var-file="terraform.tfvars"
+   ```
 
 5. Apply:
+   ```
     terraform apply -var-file="terraform.tfvars"
+   ```
 
 6. Outputs will show:
     - S3 bucket names
@@ -110,10 +116,14 @@ See folder structure in repository root.
 
 ## Cleanup
 - Terraform:
+   ```
     terraform destroy -var-file="terraform.tfvars"
+   ```
 
 - CloudFormation:
+   ```
     aws cloudformation delete-stack --stack-name prog8870-s3
+   ```
     aws cloudformation delete-stack --stack-name prog8870-ec2
     aws cloudformation delete-stack --stack-name prog8870-rds
 
