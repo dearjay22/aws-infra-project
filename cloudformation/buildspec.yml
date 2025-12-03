@@ -1,10 +1,6 @@
 version: 0.2
 
 phases:
-  install:
-    commands:
-      - aws --version
-
   pre_build:
     commands:
       - echo "Validating templates..."
@@ -16,46 +12,20 @@ phases:
   build:
     commands:
       - echo "Deploying networking stack..."
-      - aws cloudformation deploy \
-          --stack-name prog8870-networking \
-          --template-file cloudformation/networking.yml \
-          --capabilities CAPABILITY_NAMED_IAM
+      - aws cloudformation deploy --stack-name prog8870-networking --template-file cloudformation/networking.yml --capabilities CAPABILITY_NAMED_IAM
 
       - echo "Fetching outputs from networking stack..."
       - export PUBLIC_SUBNET_ID=$(aws cloudformation describe-stacks --stack-name prog8870-networking --query "Stacks[0].Outputs[?OutputKey=='PublicSubnetId'].OutputValue" --output text)
       - export DB_SG_ID=$(aws cloudformation describe-stacks --stack-name prog8870-networking --query "Stacks[0].Outputs[?OutputKey=='DBSecurityGroupId'].OutputValue" --output text)
 
       - echo "Deploying EC2 stack..."
-      - aws cloudformation deploy \
-          --stack-name prog8870-ec2 \
-          --template-file cloudformation/ec2.yml \
-          --parameter-overrides \
-              KeyName=my-ec2-keypair \
-              AmiId=ami-0e0820ad173f20fbb \
-              PublicSubnetId=$PUBLIC_SUBNET_ID \
-          --capabilities CAPABILITY_NAMED_IAM
+      - aws cloudformation deploy --stack-name prog8870-ec2 --template-file cloudformation/ec2.yml --parameter-overrides KeyName=my-ec2-keypair AmiId=ami-0e0820ad173f20fbb PublicSubnetId=$PUBLIC_SUBNET_ID --capabilities CAPABILITY_NAMED_IAM
 
       - echo "Deploying RDS stack..."
-      - aws cloudformation deploy \
-          --stack-name prog8870-rds \
-          --template-file cloudformation/rds.yml \
-          --parameter-overrides \
-              DBName=mydb \
-              DBUser=admin \
-              DBPassword=Admin12345! \
-              DBSubnetId=$PUBLIC_SUBNET_ID \
-              DBSecurityGroup=$DB_SG_ID \
-          --capabilities CAPABILITY_NAMED_IAM
+      - aws cloudformation deploy --stack-name prog8870-rds --template-file cloudformation/rds.yml --parameter-overrides DBName=mydb DBUser=admin DBPassword=Admin12345! DBSubnetId=$PUBLIC_SUBNET_ID DBSecurityGroup=$DB_SG_ID --capabilities CAPABILITY_NAMED_IAM
 
       - echo "Deploying S3 stack..."
-      - aws cloudformation deploy \
-          --stack-name prog8870-s3 \
-          --template-file cloudformation/s3.yml \
-          --parameter-overrides \
-              BucketName1=jay-bucket-1 \
-              BucketName2=jay-bucket-2 \
-              BucketName3=jay-bucket-3 \
-          --capabilities CAPABILITY_NAMED_IAM
+      - aws cloudformation deploy --stack-name prog8870-s3 --template-file cloudformation/s3.yml --parameter-overrides BucketName1=jay-bucket-1 BucketName2=jay-bucket-2 BucketName3=jay-bucket-3 --capabilities CAPABILITY_NAMED_IAM
 
 artifacts:
   files:
