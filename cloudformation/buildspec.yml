@@ -20,7 +20,11 @@ phases:
 
   pre_build:
     commands:
-      - echo "Pre-build phase complete"
+      - echo "Validating CloudFormation templates..."
+      - aws cloudformation validate-template --template-body file://networking.yml
+      - aws cloudformation validate-template --template-body file://ec2.yml
+      - aws cloudformation validate-template --template-body file://rds.yml
+      - aws cloudformation validate-template --template-body file://s3.yml
 
   build:
     commands:
