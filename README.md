@@ -123,9 +123,9 @@ See folder structure in repository root.
 - CloudFormation:
    ```
     aws cloudformation delete-stack --stack-name prog8870-s3
-   ```
     aws cloudformation delete-stack --stack-name prog8870-ec2
     aws cloudformation delete-stack --stack-name prog8870-rds
+   ```
 
 ## Troubleshooting tips
 - IAM permission errors: ensure user/role has EC2, S3, RDS, CloudFormation privileges.
