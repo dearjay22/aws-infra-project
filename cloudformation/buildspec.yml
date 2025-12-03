@@ -1,0 +1,78 @@
+version: 0.2
+
+env:
+  variables:
+    EC2_KEY_NAME: "my-ec2-keypair"             # Your EC2 key pair
+    EC2_AMI_ID: "ami-0156001f0548e90b1"       
+    RDS_DB_NAME: "mydatabaseforInfra"
+    RDS_DB_USER: "admin"
+    RDS_DB_PASSWORD: "MySecurePassword"
+
+phases:
+  install:
+    commands:
+      - echo "Installing AWS CLI v2..."
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip awscliv2.zip
+      - sudo ./aws/install
+      - aws --version
+      - echo "Install phase complete"
+
+  pre_build:
+    commands:
+      - echo "Pre-build phase complete"
+
+  build:
+    commands:
+      - echo "Deploying VPC stack..."
+      - aws cloudformation deploy \
+          --stack-name prog8870-vpc \
+          --template-file networking.yml \
+          --capabilities CAPABILITY_NAMED_IAM
+      - echo "Fetching VPC outputs..."
+      - export PUBLIC_SUBNET_1_ID=$(aws cloudformation describe-stacks --stack-name prog8870-vpc --query "Stacks[0].Outputs[?OutputKey=='PublicSubnet1Id'].OutputValue" --output text)
+      - export PUBLIC_SUBNET_2_ID=$(aws cloudformation describe-stacks --stack-name prog8870-vpc --query "Stacks[0].Outputs[?OutputKey=='PublicSubnet2Id'].OutputValue" --output text)
+      - export DB_SG_ID=$(aws cloudformation describe-stacks --stack-name prog8870-vpc --query "Stacks[0].Outputs[?OutputKey=='DbSecurityGroupId'].OutputValue" --output text)
+
+      - echo "Deploying S3 stack..."
+      - aws cloudformation deploy \
+          --stack-name prog8870-s3 \
+          --template-file s3.yml \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --parameter-overrides \
+            BucketName1=prog8870-bucket-1 \
+            BucketName2=prog8870-bucket-2 \
+            BucketName3=prog8870-bucket-3
+
+      - echo "Deploying EC2 stack..."
+      - aws cloudformation deploy \
+          --stack-name prog8870-ec2 \
+          --template-file ec2.yml \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --parameter-overrides \
+            KeyName=$EC2_KEY_NAME \
+            AmiId=$EC2_AMI_ID \
+            PublicSubnetId=$PUBLIC_SUBNET_1_ID
+
+      - echo "Deploying RDS stack..."
+      - aws cloudformation deploy \
+          --stack-name prog8870-rds \
+          --template-file rds.yml \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --parameter-overrides \
+            DBName=$RDS_DB_NAME \
+            DBUser=$RDS_DB_USER \
+            DBPassword=$RDS_DB_PASSWORD \
+            DBSubnetId=$PUBLIC_SUBNET_1_ID \
+            DBSecurityGroup=$DB_SG_ID
+
+  post_build:
+    commands:
+      - echo "All stacks deployed successfully!"
+      - echo "Fetching RDS endpoint..."
+      - export RDS_ENDPOINT=$(aws cloudformation describe-stacks --stack-name prog8870-rds --query "Stacks[0].Outputs[?OutputKey=='RdsEndpoint'].OutputValue" --output text)
+      - echo "RDS endpoint: $RDS_ENDPOINT"
+
+artifacts:
+  files:
+    - '**/*'

@@ -1,0 +1,35 @@
+# ==============================
+# Terraform
+# ==============================
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+
+# ==============================
+# AWS / Keys
+# ==============================
+*.pem
+*.key
+*.crt
+.aws/
+
+# ==============================
+# CloudFormation
+# ==============================
+# Keep YAML files, ignore temp or export files if any
+*.template
+*.json
+
+# ==============================
+# IDE / OS files
+# ==============================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.log

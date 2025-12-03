@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 instance
+
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  AmiId:
+    Type: AWS::EC2::Image::Id
+  PublicSubnetId:
+    Type: String
+
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH
+      VpcId: !Ref "AWS::NoValue"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: !Ref AmiId
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          SubnetId: !Ref PublicSubnetId
+          GroupSet:
+            - !Ref InstanceSecurityGroup
+
+Outputs:
+  InstancePublicIp:
+    Value: !GetAtt EC2Instance.PublicIp
