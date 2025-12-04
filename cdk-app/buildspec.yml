@@ -7,6 +7,5 @@ phases:
       - npm install -g aws-cdk
   build:
     commands:
-      - cd cdk-app
-      - cdk synth
+      - cdk synth --app "python app.py"
       - cdk deploy --require-approval never
