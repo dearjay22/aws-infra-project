@@ -10,15 +10,15 @@ phases:
       - aws cloudformation validate-template --template-body file://cloudformation/s3.yml
 
       # Delete failed EC2 stack if it exists
-    - echo "Deleting existing EC2 stack if in ROLLBACK_COMPLETE..."
-    - |
-      STACK_STATUS=$(aws cloudformation describe-stacks --stack-name prog8870-ec2 --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "NOT_FOUND")
-      if [ "$STACK_STATUS" == "ROLLBACK_COMPLETE" ]; then
-        echo "Found failed EC2 stack. Deleting..."
-        aws cloudformation delete-stack --stack-name prog8870-ec2
-        aws cloudformation wait stack-delete-complete --stack-name prog8870-ec2
-        echo "Deleted failed EC2 stack."
-      fi
+      - echo "Deleting existing EC2 stack if in ROLLBACK_COMPLETE..."
+      - |
+        STACK_STATUS=$(aws cloudformation describe-stacks --stack-name prog8870-ec2 --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "NOT_FOUND")
+        if [ "$STACK_STATUS" == "ROLLBACK_COMPLETE" ]; then
+          echo "Found failed EC2 stack. Deleting..."
+          aws cloudformation delete-stack --stack-name prog8870-ec2
+          aws cloudformation wait stack-delete-complete --stack-name prog8870-ec2
+          echo "Deleted failed EC2 stack."
+        fi
 
   build:
     commands:
