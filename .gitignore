@@ -35,3 +35,5 @@ Thumbs.db
 *.bak
 *.log
 cdk-app/cdk/__pycache__
+
+!cdk.json
