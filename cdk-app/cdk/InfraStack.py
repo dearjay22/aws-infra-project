@@ -60,7 +60,7 @@ class InfraStack(Stack):
             "Prog8870EC2",
             instance_type=ec2.InstanceType("t3.micro"),
             machine_image=ec2.MachineImage.generic_linux({
-                "us-east-1": "0c02fb55956c7d316"  # your AMI ID
+                "us-east-1": "0c02fb55956c7d316"
             }),
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(subnets=[public_subnet]),

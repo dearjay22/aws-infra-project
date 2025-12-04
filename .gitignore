@@ -21,6 +21,7 @@ terraform.tfstate.backup
 # Keep YAML files, ignore temp or export files if any
 *.template
 *.json
+cdk.out
 
 # ==============================
 # IDE / OS files
@@ -33,3 +34,4 @@ Thumbs.db
 *.swo
 *.bak
 *.log
+cdk-app/cdk/__pycache__
