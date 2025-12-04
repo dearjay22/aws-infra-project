@@ -4,13 +4,20 @@ Description: RDS MySQL instance
 Parameters:
   DBName:
     Type: String
+
   DBUser:
     Type: String
+
   DBPassword:
     Type: String
     NoEcho: true
-  DBSubnetId:
+
+  Subnet1:
     Type: String
+
+  Subnet2:
+    Type: String
+
   DBSecurityGroup:
     Type: String
 
@@ -20,7 +27,8 @@ Resources:
     Properties:
       DBSubnetGroupDescription: "Subnet group for prog8870 RDS"
       SubnetIds:
-        - !Ref DBSubnetId
+        - !Ref Subnet1
+        - !Ref Subnet2
 
   DBInstance:
     Type: AWS::RDS::DBInstance
