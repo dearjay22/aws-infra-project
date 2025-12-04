@@ -8,5 +8,6 @@ phases:
   build:
     commands:
       - cd ./cdk-app
+      - cdk bootstrap aws://141262319565/us-east-1
       - cdk synth
       - cdk deploy --require-approval never

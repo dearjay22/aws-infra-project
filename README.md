@@ -102,18 +102,6 @@ See folder structure in repository root.
 - In production, restrict security group ingress, disable public RDS access, and use remote state (S3 + locking).
 - Modules are used to keep infra modular and reusable.
 
-## Deliverables for submission
-- GitHub repo URL (push this folder).
-- Screenshots:
-- S3 buckets with versioning enabled (AWS Console).
-- EC2 instance with public IP.
-- RDS running instance (Console).
-- Terraform apply output and CloudFormation stack outputs.
-- Terraform files: `main.tf`, `provider.tf`, `variables.tf`, `terraform.tfvars` (template), `backend.tf`
-- CloudFormation templates: `cloudformation/s3.yaml`, `cloudformation/ec2.yaml`, `cloudformation/rds.yaml`
-- README.md (this file).
-- PPT slides (we'll create these after code is final).
-
 ## Cleanup
 - Terraform:
    ```
