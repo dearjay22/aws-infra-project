@@ -12,6 +12,30 @@ See folder structure in repository root.
 - An EC2 Key Pair in the selected region (for SSH).
 - For CloudFormation RDS, you may need subnet IDs and security group IDs or modify the rds.yaml to create them.
 
+1. **AWS Account** with sufficient permissions:
+
+   * CloudFormation
+   * CodePipeline
+   * CodeBuild
+   * IAM
+   * CDK deployment permissions
+
+2. **AWS CLI** installed and configured:
+
+   ```bash
+   aws configure
+   ```
+
+3. **AWS CDK CLI** installed:
+
+   ```bash
+   npm install -g aws-cdk
+   ```
+
+4. Python 3.11 and pip installed.
+
+---
+
 ## Terraform: Quick start (root: `terraform/`)
 1. `cd terraform`
 
@@ -47,49 +71,33 @@ See folder structure in repository root.
     - AMI: Terraform uses a data source to pick latest Amazon Linux 2 (no hardcoded AMI).
     - Do NOT commit `terraform.tfstate` or files with real secrets to GitHub.
 
-## CloudFormation: Quick start (root: `cloudformation/`)
+## CloudFormation: Quick start (root: `cdk-app/`)
 
-1. S3 (deploy three buckets)
-  ```
-  aws cloudformation create-stack --stack-name prog8870-s3
-    --template-body file://s3.yaml
-    --parameters ParameterKey=BucketName1,ParameterValue=unique-bucket-1
-    ParameterKey=BucketName2,ParameterValue=unique-bucket-2
-    ParameterKey=BucketName3,ParameterValue=unique-bucket-3
-    --capabilities CAPABILITY_NAMED_IAM
-  ```
-2. EC2 (deploy VPC + instance)
-- Find an AMI id for Amazon Linux 2 (example shown below) or pass `AmiId` param:
-  ```
-  # quick AMI lookup (Linux 2) with AWS CLI (us-east-1)
-  aws ec2 describe-images --owners amazon \
-    --filters 'Name=name,Values=amzn2-ami-hvm-*-x86_64-gp2' \
-    --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' --output text --region us-east-1
-  ```
+2. **Install Python dependencies**:
 
-- Create stack (specify KeyName and AmiId):
-  ```
-  aws cloudformation create-stack --stack-name prog8870-ec2 \
-    --template-body file://ec2.yaml \
-    --parameters ParameterKey=InstanceType,ParameterValue=t3.micro \
-                 ParameterKey=AmiId,ParameterValue=ami-xxxxxxxx \
-                 ParameterKey=KeyName,ParameterValue=your-ec2-keypair \
-    --capabilities CAPABILITY_NAMED_IAM
-  ```
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
 
-3. RDS
-- Because `rds.yaml` expects Subnet IDs and SG IDs or modifications, either:
-  - Replace placeholder values before deployment, or
-  - Expand template to create the VPC/Subnets/Security groups similarly to `ec2.yaml`.
+3. **Bootstrap CDK environment** (if first time):
 
-- Example CLI with parameters (if template adapted):
-  ```
-  aws cloudformation create-stack --stack-name prog8870-rds \
-    --template-body file://rds.yaml \
-    --parameters ParameterKey=DBName,ParameterValue=mydb \
-                 ParameterKey=DBUser,ParameterValue=admin \
-                 ParameterKey=DBPassword,ParameterValue=ChangeMe123! \
-                 ParameterKey=DBInstanceClass,ParameterValue=db.t3.micro
+   ```bash
+   cdk bootstrap aws://<ACCOUNT_ID>/<REGION>
+   ```
+
+4. **Deploy the pipeline**:
+
+   ```bash
+   cdk deploy InfraStack --require-approval never
+   ```
+
+5. **Pipeline Flow**:
+
+   * **Source Stage**: Pulls code from GitHub.
+   * **Build Stage**: Synthesizes CDK templates (`cdk synth`) and stores in `cdk.out`.
+   * **Deploy Stage**: Deploys the `InfraStack` using CloudFormation templates from build artifacts.
+
   ```
 
 ## What to fill in `terraform.tfvars`
@@ -110,9 +118,7 @@ See folder structure in repository root.
 
 - CloudFormation:
    ```
-    aws cloudformation delete-stack --stack-name prog8870-s3
-    aws cloudformation delete-stack --stack-name prog8870-ec2
-    aws cloudformation delete-stack --stack-name prog8870-rds
+    cdk destroy InfraStack --require-approval never
    ```
 
 ## Troubleshooting tips
